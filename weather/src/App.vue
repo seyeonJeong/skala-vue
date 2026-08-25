@@ -55,6 +55,29 @@ const filteredWeatherList = computed(() => {
   )
 })
 
+// 5. 본인 추가: 최고 기온 / 최고 습도 도시
+const highlightMode = ref('temp') // 'temp' | 'humidity'
+
+const hottestCity = computed(() => {
+  if (weatherList.value.length === 0) return null
+  return weatherList.value.reduce((max, city) =>
+    city.temp > max.temp ? city : max,
+  )
+})
+
+const mostHumidCity = computed(() => {
+  if (weatherList.value.length === 0) return null
+  return weatherList.value.reduce((max, city) =>
+    city.humidity > max.humidity ? city : max,
+  )
+})
+
+const highlightCity = computed(() => {
+  return highlightMode.value === 'temp'
+    ? hottestCity.value
+    : mostHumidCity.value
+})
+
 // 검색창 입력
 const updateSearchQuery = (event) => {
   searchQuery.value = event.target.value
@@ -86,6 +109,18 @@ watch(selectedCityInfo, (newCity, oldCity) => {
 watchEffect(() => {
   console.log(
     `현재 검색어: ${searchQuery.value}`,
+  )
+})
+
+// 5. 본인 추가: 하이라이트 도시 감시
+watch(highlightCity, (city) => {
+  if (!city) return
+  const label =
+    highlightMode.value === 'temp' ? '최고 기온' : '최고 습도'
+  console.log(
+    `${label} 도시:`,
+    city.name,
+    `(기온 ${city.temp}℃, 습도 ${city.humidity}%)`,
   )
 })
 </script>
@@ -120,6 +155,37 @@ watchEffect(() => {
 
       <p v-else>
         아직 선택된 도시가 없습니다.
+      </p>
+    </section>
+
+    <!-- 5. 본인 추가: 최고 기온 / 최고 습도 -->
+    <section class="highlight-box">
+      <div class="highlight-buttons">
+        <button
+          type="button"
+          :class="{ active: highlightMode === 'temp' }"
+          @click="highlightMode = 'temp'"
+        >
+          최고 기온 도시
+        </button>
+        <button
+          type="button"
+          :class="{ active: highlightMode === 'humidity' }"
+          @click="highlightMode = 'humidity'"
+        >
+          최고 습도 도시
+        </button>
+      </div>
+
+      <p v-if="highlightCity">
+        <template v-if="highlightMode === 'temp'">
+          최고 기온:
+          {{ hottestCity.name }} ({{ hottestCity.temp }}℃)
+        </template>
+        <template v-else>
+          최고 습도:
+          {{ mostHumidCity.name }} ({{ mostHumidCity.humidity }}%)
+        </template>
       </p>
     </section>
 
@@ -196,6 +262,25 @@ watchEffect(() => {
   padding: 15px 18px;
   background-color: #f3f3f3;
   border-radius: 8px;
+}
+
+.highlight-box {
+  margin-bottom: 24px;
+  padding: 15px 18px;
+  background-color: #eef6ff;
+  border-radius: 8px;
+}
+
+.highlight-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.highlight-buttons button.active {
+  background-color: #2c6ecb;
+  color: #fff;
+  border-color: #2c6ecb;
 }
 
 .weather-list {
