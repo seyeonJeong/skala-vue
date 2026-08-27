@@ -32,6 +32,13 @@ const displayTemp = computed(() => {
     <p>날씨: {{ city.status }}</p>
     <p>습도: {{ city.humidity }}%</p>
 
+    <img
+      v-if="city.icon"
+      class="weather-icon"
+      :src="`https://openweathermap.org/img/wn/${city.icon}.png`"
+      :alt="city.status"
+    />
+
     <!-- 더움/선선함은 원본 섭씨 기준 -->
     <p
       v-if="city.temp >= 25"
@@ -69,6 +76,11 @@ const displayTemp = computed(() => {
 .hot,
 .cool {
   font-weight: bold;
+}
+
+.weather-icon {
+  display: block;
+  margin: 4px 0;
 }
 
 button {

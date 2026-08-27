@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, watch, watchEffect } from 'vue'
+import { ref, computed, watch, watchEffect, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
-import { weatherList as weatherMockList } from '../data/weatherMock'
+import { fetchAllCurrentWeather, hasOpenWeatherKey } from '../api/openWeather'
 import { useConfigStore } from '../stores/configStore'
 
 const router = useRouter()
@@ -12,7 +12,11 @@ const configStore = useConfigStore()
 
 const searchQuery = ref('')
 const selectedCityInfo = ref(null)
-const weatherList = ref([...weatherMockList])
+const weatherList = ref([])
+const loading = ref(false)
+const errorMessage = ref('')
+const errorDetails = ref([])
+const dataSource = ref('mock')
 
 const filteredWeatherList = computed(() => {
   if (searchQuery.value.trim() === '') {
@@ -50,10 +54,37 @@ const selectCity = (city) => {
   selectedCityInfo.value = city
 }
 
-// alert 제거 → Programmatic Navigation
 const goToDetail = (city) => {
   router.push('/weather/' + city.id)
 }
+
+const loadWeather = async () => {
+  loading.value = true
+  errorMessage.value = ''
+  errorDetails.value = []
+
+  try {
+    const { source, list, error } = await fetchAllCurrentWeather()
+    weatherList.value = list
+    dataSource.value = source
+
+    if (!hasOpenWeatherKey()) {
+      errorMessage.value =
+        'OpenWeatherMap API Key가 없어 Mock 데이터를 표시합니다. (.env 설정 후 재시작)'
+    } else if (error) {
+      errorMessage.value = error.summary
+      errorDetails.value = error.details
+    }
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = '날씨 데이터를 불러오지 못했습니다.'
+    errorDetails.value = [String(error?.message ?? error)]
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadWeather)
 
 watch(selectedCityInfo, (newCity, oldCity) => {
   console.log(
@@ -82,7 +113,37 @@ watch(highlightCity, (city) => {
 
 <template>
   <main class="container">
-    <h1>날씨 대시보드</h1>
+    <div class="header-row">
+      <h1>날씨 대시보드</h1>
+      <button
+        type="button"
+        class="refresh-btn"
+        :disabled="loading"
+        @click="loadWeather"
+      >
+        {{ loading ? '불러오는 중...' : '새로고침' }}
+      </button>
+    </div>
+
+    <p class="source-badge">
+      데이터 소스:
+      {{ dataSource === 'openweather' ? 'OpenWeatherMap (실데이터)' : 'Mock' }}
+    </p>
+
+    <div
+      v-if="errorMessage"
+      class="error-banner"
+    >
+      <p>{{ errorMessage }}</p>
+      <ul v-if="errorDetails.length">
+        <li
+          v-for="(detail, index) in errorDetails"
+          :key="index"
+        >
+          {{ detail }}
+        </li>
+      </ul>
+    </div>
 
     <BaseDashboardCard>
       <template #search>
@@ -135,7 +196,14 @@ watch(highlightCity, (city) => {
       </template>
 
       <template #list>
-        <template v-if="filteredWeatherList.length > 0">
+        <p
+          v-if="loading"
+          class="no-result"
+        >
+          날씨 데이터를 불러오는 중...
+        </p>
+
+        <template v-else-if="filteredWeatherList.length > 0">
           <WeatherCard
             v-for="city in filteredWeatherList"
             :key="city.id"
@@ -161,6 +229,39 @@ watch(highlightCity, (city) => {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.refresh-btn {
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.source-badge {
+  margin: 8px 0 12px;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.error-banner {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fff3cd;
+  color: #856404;
+}
+
+.error-banner ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  word-break: break-word;
 }
 
 .status-bar {

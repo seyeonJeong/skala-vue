@@ -9,12 +9,15 @@ Vue.js 실습 제출용 저장소입니다.
 skala-vue/
 └── weather/
     └── src/
-        ├── main.js                 # Pinia + Router 전역 주입
-        ├── App.vue                 # RouterLink 내비 + UnitToggler + RouterView
+        ├── main.js
+        ├── App.vue
+        ├── api/
+        │   ├── openWeather.js      # OpenWeatherMap (Axios)
+        │   └── external.js         # REST Countries (외부 API)
         ├── router/
         │   └── index.js
         ├── stores/
-        │   └── configStore.js      # 기온 단위 Pinia Store
+        │   └── configStore.js
         ├── data/
         │   └── weatherMock.js
         ├── components/
@@ -30,7 +33,6 @@ skala-vue/
             ├── WeatherStatsView.vue
             └── NotFoundView.vue
 ```
-
 ## 실행 방법
 
 ```sh
@@ -246,3 +248,45 @@ Pinia를 활용한 전역 기온 단위(섭씨/화씨) 설정 실습입니다.
 
 ## 4. 본인 추가
 - `unitLabel` getter, `convertTemp` action, `toggleCount` state
+
+---
+
+# Hands on - Weather Axios
+
+Axios로 OpenWeatherMap / 외부 API를 연동한 실습입니다.
+
+## 1. 준비
+- `npm install axios`
+- OpenWeatherMap 가입 후 API Key 발급
+- `weather/.env` 파일 생성:
+
+```sh
+VITE_OPENWEATHER_API_KEY=발급받은_키
+```
+
+- `.env.example` 참고, `.env`는 git에 올리지 않음
+- Key 설정 후 `npm run dev` **재시작** 필요
+
+## 2. OpenWeatherMap 실데이터 적용
+- `src/api/openWeather.js` — Axios 기반 Current Weather 호출
+- `WeatherHomeView`에서 서울/수원/부산/제주 현재 날씨 로드
+- Key가 없으면 Mock 데이터로 폴백 + 안내 배너
+
+## 3. OpenWeatherMap 추가 API (기능 확장)
+- **5 Day / 3 Hour Forecast** — 상세 페이지 예보 목록
+- **Air Pollution** — 상세 페이지 대기질(AQI, PM2.5, PM10)
+
+## 4. 기타 외부 API (기능 확장)
+- **Open-Meteo Geocoding API** — 도시 인구/타임존/좌표
+- **Wikipedia REST API** — 도시 소개 문구/썸네일
+- 상세 페이지(`WeatherDetailView`) 하단에 표시
+- API Key 불필요
+
+## 주요 파일
+
+```text
+src/api/openWeather.js   # OWM Current / Forecast / Air Pollution
+src/api/external.js      # Open-Meteo + Wikipedia
+src/views/WeatherHomeView.vue
+src/views/WeatherDetailView.vue
+```
