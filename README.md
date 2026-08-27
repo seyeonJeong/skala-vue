@@ -7,7 +7,25 @@ Vue.js 실습 제출용 저장소입니다.
 
 ```text
 skala-vue/
-└── weather/    # Weather Dashboard (Composition API 실습)
+└── weather/
+    └── src/
+        ├── main.js                 # 라우터 전역 주입 (.use(router))
+        ├── App.vue                 # RouterLink 내비 + RouterView
+        ├── router/
+        │   └── index.js            # routes + Lazy Loading + Catch-all
+        ├── data/
+        │   └── weatherMock.js      # 도시 Mock 데이터
+        ├── components/
+        │   └── exercise/           # 실습용 부품 컴포넌트
+        │       ├── BaseDashboardCard.vue
+        │       ├── SearchBar.vue
+        │       └── WeatherCard.vue
+        └── views/
+            ├── WeatherHomeView.vue     # 메인 대시보드 (/)
+            ├── WeatherAboutView.vue    # 소개 (/about)
+            ├── WeatherDetailView.vue   # 상세 (/weather/:cityId)
+            ├── WeatherStatsView.vue    # 본인 추가 View (/stats)
+            └── NotFoundView.vue        # Catch-all (404)
 ```
 
 ## 실행 방법
@@ -99,7 +117,8 @@ npm run dev
 
 # Hands on - Weather Composition
 
-Vue Composition API(`ref`, `computed`, `watch`, `watchEffect`)를 활용한 날씨 대시보드 실습입니다.
+Vue Composition API(`ref`, `computed`, `watch`, `watchEffect`)를 활용한 날씨 대시보드 실습입니다.  
+(1일차 Mockup 기능을 Composition API로 정리한 단계)
 
 ## 1. 반응형 상태 관리 (ref)
 - `searchQuery`: 도시 검색어
@@ -107,17 +126,17 @@ Vue Composition API(`ref`, `computed`, `watch`, `watchEffect`)를 활용한 날�
 - `weatherList`: 지역별 날씨 데이터 배열 (서울, 수원, 부산, 제주)
 
 ## 2. 검색 도시 필터링 (computed)
-- `filteredWeatherList`: 검색어가 도시 이름에 포함된 항목만 필터링
+- `filteredWeatherList`: 전체 날씨 리스트 중 검색어가 도시 이름에 포함된 항목만 필터링
 - 검색어가 비어 있으면 원본 `weatherList` 반환
 
-## 3. 반응형 변수 변화 감시
-- `watch(selectedCityInfo)`: 선택 도시가 바뀔 때마다 콘솔 로그 출력
-- `watchEffect(searchQuery)`: 검색어 타이핑마다 콘솔 로그 출력
+## 3. 반응형 변수 변화 감시 (watch, watchEffect)
+- `watch(selectedCityInfo)`: 상태바 문구가 바뀔 때마다 콘솔 로그 출력
+- `watchEffect`: 검색어(`searchQuery`) 타이핑마다 콘솔 로그 출력
 
 ## 4. 검색 결과 표시 (Template)
-- 검색어가 비었을 때: 전체 날씨 카드 출력
-- 검색어와 일치하는 데이터가 있을 때: 필터링된 카드 출력
-- 일치하는 데이터가 없을 때: "검색 결과와 일치하는 도시가 없습니다." 안내
+- 검색어가 비었을 때: 원본 데이터 출력
+- 검색어와 일치하는 데이터가 있을 때: 해당 데이터 출력
+- 검색어와 일치하는 데이터가 없을 때: "검색 결과와 일치하는 도시가 없습니다." 안내
 
 ## 5. 본인 추가 기능 (ref / computed / watch)
 - `ref`: `highlightMode` (`temp` | `humidity`) — 최고 기온/습도 전환
@@ -127,3 +146,72 @@ Vue Composition API(`ref`, `computed`, `watch`, `watchEffect`)를 활용한 날�
   - `highlightCity`: 현재 모드에 따른 하이라이트 도시
 - `watch(highlightCity)`: 하이라이트 도시 변경 시 콘솔 로그 출력
 - 화면에 최고 기온 / 최고 습도 도시 버튼 및 결과 문구 표시
+
+---
+
+# Hands on - Weather Components
+
+Composition 실습 이후, 단일 파일을 컴포넌트로 분리한 단계입니다.  
+(현재는 `components/exercise/` + `WeatherHomeView`로 이어짐)
+
+## 1. WeatherParent → WeatherHomeView
+- 모든 반응형 데이터·computed·watch 유지
+- 자식 컴포넌트 조립 및 이벤트 처리
+
+## 2. BaseDashboardCard.vue
+- 검색박스와 리스트박스 디자인 공통화
+- `<slot>` (`#search`, `#status`, `#list`)으로 부모가 도시 검색·상태·날씨 현황 주입
+
+## 3. SearchBar.vue
+- 부모로부터 검색어 반응형 데이터를 전달받아 표시 (props: `searchQuery`)
+- 도시 검색 시 `update-query` 이벤트로 검색어를 부모에게 전달 (emits)
+
+## 4. WeatherCard.vue
+- 도시 객체를 전달받아 표시 (props: `city`)
+- 카드 선택(`select-card`)과 상세보기(`click-detail`)를 부모에게 전달 (emits)
+
+## 데이터 흐름
+- 부모 → 자식: **props** (`searchQuery`, `city`)
+- 자식 → 부모: **emits** (`update-query`, `select-card`, `click-detail`)
+
+---
+
+# Hands on - Weather Router
+
+Vue Router를 적용한 페이지 라우팅 실습입니다.
+
+## 1. Vue Router 설정
+- `main.js`에서 `.use(router)`로 전역 주입
+- `router/index.js`에서 **Lazy Loading** (`() => import(...)`) 적용
+- Catch-all Route (`/:pathMatch(.*)*`) → `NotFoundView`
+
+## 2. App.vue
+- Navigation Bar (`RouterLink`: 대시보드 / 통계 / 소개)
+- 메인 콘텐츠 영역 (`RouterView`)
+
+## 3. WeatherHomeView.vue (`/`)
+- 기존 WeatherParent 역할을 페이지 View로 이전
+- 상세보기 시 `window.alert` 제거
+- Programmatic Navigation: `router.push('/weather/' + id)`
+
+## 4. WeatherDetailView.vue (`/weather/:cityId`)
+- 동적 경로 `cityId`로 Mock Data에서 도시 객체 선택 (`onMounted`)
+- 지역별 상세 기상관측 정보 표시 (체감온도, 풍속, 관측 메모 등)
+
+## 5. WeatherAboutView.vue (`/about`)
+- 서비스 소개 문구 작성
+- 메인 대시보드로 돌아가기 버튼
+
+## 6. 본인 추가 View — WeatherStatsView.vue (`/stats`)
+- 평균 기온 / 평균 습도 / 최대 풍속 도시 통계 페이지
+- 라우팅 연결 및 내비 메뉴에 추가
+
+## 라우트 요약
+
+| 경로 | View |
+|---|---|
+| `/` | WeatherHomeView |
+| `/about` | WeatherAboutView |
+| `/stats` | WeatherStatsView (추가) |
+| `/weather/:cityId` | WeatherDetailView |
+| `/*` (미정의 경로) | NotFoundView |
