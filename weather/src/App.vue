@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import UnitToggler from './components/exercise/UnitToggler.vue'
 </script>
 
 <template>
@@ -8,6 +9,9 @@ import { RouterLink, RouterView } from 'vue-router'
       <RouterLink to="/">대시보드</RouterLink>
       <RouterLink to="/stats">통계</RouterLink>
       <RouterLink to="/about">소개</RouterLink>
+
+      <!-- 내비 옆에 단위 토글러 배치 -->
+      <UnitToggler />
     </nav>
 
     <RouterView />
@@ -21,6 +25,7 @@ import { RouterLink, RouterView } from 'vue-router'
 
 .nav-bar {
   display: flex;
+  align-items: center;
   gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 12px;

@@ -5,8 +5,10 @@ import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import { weatherList as weatherMockList } from '../data/weatherMock'
+import { useConfigStore } from '../stores/configStore'
 
 const router = useRouter()
+const configStore = useConfigStore()
 
 const searchQuery = ref('')
 const selectedCityInfo = ref(null)
@@ -121,7 +123,8 @@ watch(highlightCity, (city) => {
           <p v-if="highlightCity">
             <template v-if="highlightMode === 'temp'">
               최고 기온:
-              {{ hottestCity.name }} ({{ hottestCity.temp }}℃)
+              {{ hottestCity.name }}
+              ({{ configStore.convertTemp(hottestCity.temp) }}{{ configStore.unitSymbol }})
             </template>
             <template v-else>
               최고 습도:

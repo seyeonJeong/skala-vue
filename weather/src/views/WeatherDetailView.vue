@@ -1,20 +1,31 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { findCityById } from '../data/weatherMock'
+import { useConfigStore } from '../stores/configStore'
 
 const route = useRoute()
 const router = useRouter()
+const configStore = useConfigStore()
 
 const city = ref(null)
 
 const loadCity = () => {
-  // 동적 경로 :cityId 기준으로 Mock Data에서 도시 선택
   city.value = findCityById(route.params.cityId)
 }
 
 onMounted(loadCity)
 watch(() => route.params.cityId, loadCity)
+
+const displayTemp = computed(() => {
+  if (!city.value) return null
+  return configStore.convertTemp(city.value.temp)
+})
+
+const displayFeelsLike = computed(() => {
+  if (!city.value) return null
+  return configStore.convertTemp(city.value.feelsLike)
+})
 </script>
 
 <template>
@@ -27,8 +38,14 @@ watch(() => route.params.cityId, loadCity)
     >
       <h2>{{ city.name }}</h2>
       <p><strong>도시 코드:</strong> {{ city.id }}</p>
-      <p><strong>기온:</strong> {{ city.temp }}℃</p>
-      <p><strong>체감온도:</strong> {{ city.feelsLike }}℃</p>
+      <p>
+        <strong>기온:</strong>
+        {{ displayTemp }}{{ configStore.unitSymbol }}
+      </p>
+      <p>
+        <strong>체감온도:</strong>
+        {{ displayFeelsLike }}{{ configStore.unitSymbol }}
+      </p>
       <p><strong>날씨:</strong> {{ city.status }}</p>
       <p><strong>습도:</strong> {{ city.humidity }}%</p>
       <p><strong>풍속:</strong> {{ city.wind }} m/s</p>

@@ -1,5 +1,8 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { useConfigStore } from '../../stores/configStore'
+
+const props = defineProps({
   city: {
     type: Object,
     required: true,
@@ -7,6 +10,13 @@ defineProps({
 })
 
 const emit = defineEmits(['select-card', 'click-detail'])
+
+const configStore = useConfigStore()
+
+// 원본 temp는 섭씨 → 현재 단위로 변환해 표시
+const displayTemp = computed(() => {
+  return configStore.convertTemp(props.city.temp)
+})
 </script>
 
 <template>
@@ -16,10 +26,13 @@ const emit = defineEmits(['select-card', 'click-detail'])
   >
     <h2>{{ city.name }}</h2>
 
-    <p>기온: {{ city.temp }}℃</p>
+    <p>
+      기온: {{ displayTemp }}{{ configStore.unitSymbol }}
+    </p>
     <p>날씨: {{ city.status }}</p>
     <p>습도: {{ city.humidity }}%</p>
 
+    <!-- 더움/선선함은 원본 섭씨 기준 -->
     <p
       v-if="city.temp >= 25"
       class="hot"

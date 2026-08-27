@@ -2,12 +2,15 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { weatherList } from '../data/weatherMock'
+import { useConfigStore } from '../stores/configStore'
 
 const router = useRouter()
+const configStore = useConfigStore()
 
 const averageTemp = computed(() => {
   const sum = weatherList.reduce((acc, city) => acc + city.temp, 0)
-  return (sum / weatherList.length).toFixed(1)
+  const celsiusAvg = sum / weatherList.length
+  return configStore.convertTemp(celsiusAvg)
 })
 
 const averageHumidity = computed(() => {
@@ -30,7 +33,7 @@ const windiestCity = computed(() => {
     <section class="stats">
       <div class="stat-card">
         <h2>평균 기온</h2>
-        <p>{{ averageTemp }}℃</p>
+        <p>{{ averageTemp }}{{ configStore.unitSymbol }}</p>
       </div>
       <div class="stat-card">
         <h2>평균 습도</h2>

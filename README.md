@@ -9,23 +9,26 @@ Vue.js 실습 제출용 저장소입니다.
 skala-vue/
 └── weather/
     └── src/
-        ├── main.js                 # 라우터 전역 주입 (.use(router))
-        ├── App.vue                 # RouterLink 내비 + RouterView
+        ├── main.js                 # Pinia + Router 전역 주입
+        ├── App.vue                 # RouterLink 내비 + UnitToggler + RouterView
         ├── router/
-        │   └── index.js            # routes + Lazy Loading + Catch-all
+        │   └── index.js
+        ├── stores/
+        │   └── configStore.js      # 기온 단위 Pinia Store
         ├── data/
-        │   └── weatherMock.js      # 도시 Mock 데이터
+        │   └── weatherMock.js
         ├── components/
-        │   └── exercise/           # 실습용 부품 컴포넌트
+        │   └── exercise/
         │       ├── BaseDashboardCard.vue
         │       ├── SearchBar.vue
-        │       └── WeatherCard.vue
+        │       ├── WeatherCard.vue
+        │       └── UnitToggler.vue
         └── views/
-            ├── WeatherHomeView.vue     # 메인 대시보드 (/)
-            ├── WeatherAboutView.vue    # 소개 (/about)
-            ├── WeatherDetailView.vue   # 상세 (/weather/:cityId)
-            ├── WeatherStatsView.vue    # 본인 추가 View (/stats)
-            └── NotFoundView.vue        # Catch-all (404)
+            ├── WeatherHomeView.vue
+            ├── WeatherAboutView.vue
+            ├── WeatherDetailView.vue
+            ├── WeatherStatsView.vue
+            └── NotFoundView.vue
 ```
 
 ## 실행 방법
@@ -215,3 +218,31 @@ Vue Router를 적용한 페이지 라우팅 실습입니다.
 | `/stats` | WeatherStatsView (추가) |
 | `/weather/:cityId` | WeatherDetailView |
 | `/*` (미정의 경로) | NotFoundView |
+
+---
+
+# Hands on - Weather Store
+
+Pinia를 활용한 전역 기온 단위(섭씨/화씨) 설정 실습입니다.
+
+## 1. configStore.js (`stores/configStore.js`)
+- **State**: `unit` (기본값 `'celsius'`), 본인 추가 `toggleCount`
+- **Getters**
+  - `unitSymbol`: `°C` / `°F`
+  - `unitLabel` (본인 추가): `섭씨(°C)` / `화씨(°F)`
+- **Actions**
+  - `toggleUnit`: 섭씨 ↔ 화씨 전환 (+ `toggleCount` 증가)
+  - `convertTemp` (본인 추가): 섭씨 원본을 현재 단위로 변환
+
+## 2. UnitToggler.vue
+- 현재 단위 라벨 표시 + **단위변경** 버튼
+- Navigation Bar 옆에 배치 (`App.vue`)
+
+## 3. 메인 / 상세 View에 단위 반영
+- `WeatherCard.vue`: `displayTemp`로 카드 기온 표시
+- `WeatherDetailView.vue`: 기온·체감온도 단위 반영
+- `WeatherHomeView` / `WeatherStatsView`: 최고 기온·평균 기온도 동일 Store 사용
+- 원본 Mock 데이터는 섭씨 유지, 화면에서만 변환
+
+## 4. 본인 추가
+- `unitLabel` getter, `convertTemp` action, `toggleCount` state
