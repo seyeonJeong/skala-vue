@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch, watchEffect, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { Refresh } from '@element-plus/icons-vue'
 import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
@@ -115,26 +116,32 @@ watch(highlightCity, (city) => {
   <main class="container">
     <div class="header-row">
       <h1>날씨 대시보드</h1>
-      <button
-        type="button"
-        class="refresh-btn"
-        :disabled="loading"
+      <el-button
+        type="primary"
+        :loading="loading"
+        :icon="Refresh"
         @click="loadWeather"
       >
-        {{ loading ? '불러오는 중...' : '새로고침' }}
-      </button>
+        새로고침
+      </el-button>
     </div>
 
-    <p class="source-badge">
+    <el-tag
+      class="source-badge"
+      :type="dataSource === 'openweather' ? 'success' : 'warning'"
+    >
       데이터 소스:
       {{ dataSource === 'openweather' ? 'OpenWeatherMap (실데이터)' : 'Mock' }}
-    </p>
+    </el-tag>
 
-    <div
+    <el-alert
       v-if="errorMessage"
-      class="error-banner"
+      class="error-alert"
+      type="warning"
+      :closable="false"
+      show-icon
+      :title="errorMessage"
     >
-      <p>{{ errorMessage }}</p>
       <ul v-if="errorDetails.length">
         <li
           v-for="(detail, index) in errorDetails"
@@ -143,7 +150,7 @@ watch(highlightCity, (city) => {
           {{ detail }}
         </li>
       </ul>
-    </div>
+    </el-alert>
 
     <BaseDashboardCard>
       <template #search>
@@ -154,34 +161,34 @@ watch(highlightCity, (city) => {
       </template>
 
       <template #status>
-        <section class="status-bar">
-          <p v-if="selectedCityInfo">
-            {{ selectedCityInfo.name }}이(가) 선택되었습니다.
-          </p>
-          <p v-else>
-            아직 선택된 도시가 없습니다.
-          </p>
-        </section>
+        <el-alert
+          type="info"
+          :closable="false"
+          show-icon
+          class="status-alert"
+          :title="
+            selectedCityInfo
+              ? `${selectedCityInfo.name}이(가) 선택되었습니다.`
+              : '아직 선택된 도시가 없습니다.'
+          "
+        />
 
-        <section class="highlight-box">
-          <div class="highlight-buttons">
-            <button
-              type="button"
-              :class="{ active: highlightMode === 'temp' }"
-              @click="highlightMode = 'temp'"
-            >
-              최고 기온 도시
-            </button>
-            <button
-              type="button"
-              :class="{ active: highlightMode === 'humidity' }"
-              @click="highlightMode = 'humidity'"
-            >
-              최고 습도 도시
-            </button>
-          </div>
+        <el-card
+          shadow="never"
+          class="highlight-box"
+        >
+          <el-radio-group
+            v-model="highlightMode"
+            size="default"
+          >
+            <el-radio-button value="temp">최고 기온 도시</el-radio-button>
+            <el-radio-button value="humidity">최고 습도 도시</el-radio-button>
+          </el-radio-group>
 
-          <p v-if="highlightCity">
+          <p
+            v-if="highlightCity"
+            class="highlight-text"
+          >
             <template v-if="highlightMode === 'temp'">
               최고 기온:
               {{ hottestCity.name }}
@@ -192,33 +199,45 @@ watch(highlightCity, (city) => {
               {{ mostHumidCity.name }} ({{ mostHumidCity.humidity }}%)
             </template>
           </p>
-        </section>
+        </el-card>
       </template>
 
       <template #list>
-        <p
+        <el-col
           v-if="loading"
-          class="no-result"
+          :span="24"
         >
-          날씨 데이터를 불러오는 중...
-        </p>
+          <div class="center-box">
+            <el-skeleton
+              :rows="4"
+              animated
+            />
+          </div>
+        </el-col>
 
         <template v-else-if="filteredWeatherList.length > 0">
-          <WeatherCard
+          <el-col
             v-for="city in filteredWeatherList"
             :key="city.id"
-            :city="city"
-            @select-card="selectCity"
-            @click-detail="goToDetail"
-          />
+            :xs="24"
+            :sm="12"
+            :md="6"
+            class="card-col"
+          >
+            <WeatherCard
+              :city="city"
+              @select-card="selectCity"
+              @click-detail="goToDetail"
+            />
+          </el-col>
         </template>
 
-        <p
+        <el-col
           v-else
-          class="no-result"
+          :span="24"
         >
-          검색 결과와 일치하는 도시가 없습니다.
-        </p>
+          <el-empty description="검색 결과와 일치하는 도시가 없습니다." />
+        </el-col>
       </template>
     </BaseDashboardCard>
   </main>
@@ -238,66 +257,37 @@ watch(highlightCity, (city) => {
   gap: 12px;
 }
 
-.refresh-btn {
-  padding: 8px 14px;
-  cursor: pointer;
-}
-
 .source-badge {
-  margin: 8px 0 12px;
-  color: #555;
-  font-size: 0.95rem;
+  margin: 12px 0;
 }
 
-.error-banner {
+.error-alert {
   margin-bottom: 16px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: #fff3cd;
-  color: #856404;
 }
 
-.error-banner ul {
+.error-alert ul {
   margin: 8px 0 0;
   padding-left: 18px;
-  font-size: 0.9rem;
-  word-break: break-word;
 }
 
-.status-bar {
-  margin-bottom: 16px;
-  padding: 15px 18px;
-  background-color: #f3f3f3;
-  border-radius: 8px;
+.status-alert {
+  margin-bottom: 12px;
 }
 
 .highlight-box {
-  margin-bottom: 8px;
-  padding: 15px 18px;
-  background-color: #eef6ff;
-  border-radius: 8px;
+  background: #f5f9ff;
 }
 
-.highlight-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
+.highlight-text {
+  margin: 14px 0 0;
+  font-weight: 600;
 }
 
-.highlight-buttons button {
-  padding: 8px 14px;
-  cursor: pointer;
+.card-col {
+  margin-bottom: 16px;
 }
 
-.highlight-buttons button.active {
-  background-color: #2c6ecb;
-  color: #fff;
-  border-color: #2c6ecb;
-}
-
-.no-result {
-  grid-column: 1 / -1;
-  padding: 20px;
-  text-align: center;
+.center-box {
+  padding: 20px 0;
 }
 </style>

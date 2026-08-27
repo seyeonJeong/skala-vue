@@ -13,78 +13,85 @@ const emit = defineEmits(['select-card', 'click-detail'])
 
 const configStore = useConfigStore()
 
-// 원본 temp는 섭씨 → 현재 단위로 변환해 표시
 const displayTemp = computed(() => {
   return configStore.convertTemp(props.city.temp)
 })
 </script>
 
 <template>
-  <div
+  <el-card
+    shadow="hover"
     class="weather-card"
     @click="emit('select-card', city)"
   >
-    <h2>{{ city.name }}</h2>
+    <template #header>
+      <div class="card-header">
+        <span>{{ city.name }}</span>
+        <img
+          v-if="city.icon"
+          :src="`https://openweathermap.org/img/wn/${city.icon}.png`"
+          :alt="city.status"
+          width="40"
+          height="40"
+        />
+      </div>
+    </template>
 
     <p>
-      기온: {{ displayTemp }}{{ configStore.unitSymbol }}
+      기온:
+      <strong>{{ displayTemp }}{{ configStore.unitSymbol }}</strong>
     </p>
     <p>날씨: {{ city.status }}</p>
     <p>습도: {{ city.humidity }}%</p>
 
-    <img
-      v-if="city.icon"
-      class="weather-icon"
-      :src="`https://openweathermap.org/img/wn/${city.icon}.png`"
-      :alt="city.status"
-    />
-
-    <!-- 더움/선선함은 원본 섭씨 기준 -->
-    <p
+    <el-tag
       v-if="city.temp >= 25"
-      class="hot"
+      type="danger"
+      effect="light"
+      class="temp-tag"
     >
       🔥 더움
-    </p>
-
-    <p
+    </el-tag>
+    <el-tag
       v-else
-      class="cool"
+      type="primary"
+      effect="light"
+      class="temp-tag"
     >
       ❄️ 선선함
-    </p>
+    </el-tag>
 
-    <button @click.stop="emit('click-detail', city)">
+    <el-button
+      type="primary"
+      plain
+      class="detail-btn"
+      @click.stop="emit('click-detail', city)"
+    >
       상세보기
-    </button>
-  </div>
+    </el-button>
+  </el-card>
 </template>
 
 <style scoped>
 .weather-card {
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
   cursor: pointer;
-  background-color: #fff;
+  height: 100%;
 }
 
-.weather-card:hover {
-  background-color: #f8f8f8;
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.1rem;
 }
 
-.hot,
-.cool {
-  font-weight: bold;
+.temp-tag {
+  margin-top: 8px;
 }
 
-.weather-icon {
-  display: block;
-  margin: 4px 0;
-}
-
-button {
-  padding: 8px 14px;
-  cursor: pointer;
+.detail-btn {
+  margin-top: 14px;
+  width: 100%;
 }
 </style>

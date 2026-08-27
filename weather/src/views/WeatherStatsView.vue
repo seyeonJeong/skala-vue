@@ -46,37 +46,70 @@ onMounted(async () => {
     <h1>날씨 통계</h1>
     <p>전체 관측 도시 기준 요약 통계입니다. (실데이터/Mock)</p>
 
-    <p
+    <div
       v-if="loading"
       class="loading"
     >
-      통계 데이터 로딩 중...
-    </p>
+      <el-skeleton
+        :rows="3"
+        animated
+      />
+    </div>
 
-    <section
+    <el-row
       v-else
+      :gutter="16"
       class="stats"
     >
-      <div class="stat-card">
-        <h2>평균 기온</h2>
-        <p>{{ averageTemp }}{{ configStore.unitSymbol }}</p>
-      </div>
-      <div class="stat-card">
-        <h2>평균 습도</h2>
-        <p>{{ averageHumidity }}%</p>
-      </div>
-      <div class="stat-card">
-        <h2>최대 풍속 도시</h2>
-        <p v-if="windiestCity">
-          {{ windiestCity.name }} ({{ windiestCity.wind }} m/s)
-        </p>
-        <p v-else>-</p>
-      </div>
-    </section>
+      <el-col
+        :xs="24"
+        :sm="8"
+      >
+        <el-card shadow="hover">
+          <h3>평균 기온</h3>
+          <p class="value">
+            {{ averageTemp }}{{ configStore.unitSymbol }}
+          </p>
+        </el-card>
+      </el-col>
+      <el-col
+        :xs="24"
+        :sm="8"
+      >
+        <el-card shadow="hover">
+          <h3>평균 습도</h3>
+          <p class="value">{{ averageHumidity }}%</p>
+        </el-card>
+      </el-col>
+      <el-col
+        :xs="24"
+        :sm="8"
+      >
+        <el-card shadow="hover">
+          <h3>최대 풍속 도시</h3>
+          <p
+            v-if="windiestCity"
+            class="value small"
+          >
+            {{ windiestCity.name }} ({{ windiestCity.wind }} m/s)
+          </p>
+          <p
+            v-else
+            class="value"
+          >
+            -
+          </p>
+        </el-card>
+      </el-col>
+    </el-row>
 
-    <button @click="router.push('/')">
+    <el-button
+      type="primary"
+      class="back-btn"
+      @click="router.push('/')"
+    >
       대시보드로 돌아가기
-    </button>
+    </el-button>
   </main>
 </template>
 
@@ -91,28 +124,25 @@ onMounted(async () => {
 }
 
 .stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
   margin-top: 24px;
 }
 
-.stat-card {
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #f7fbff;
+.stats .el-col {
+  margin-bottom: 16px;
 }
 
-button {
-  margin-top: 24px;
-  padding: 10px 16px;
-  cursor: pointer;
+.value {
+  margin: 12px 0 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2c6ecb;
 }
 
-@media (max-width: 700px) {
-  .stats {
-    grid-template-columns: 1fr;
-  }
+.value.small {
+  font-size: 1.15rem;
+}
+
+.back-btn {
+  margin-top: 12px;
 }
 </style>

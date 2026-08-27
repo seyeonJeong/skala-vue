@@ -290,3 +290,77 @@ src/api/external.js      # Open-Meteo + Wikipedia
 src/views/WeatherHomeView.vue
 src/views/WeatherDetailView.vue
 ```
+---
+
+# Hands on - Weather UI Library
+
+외부 UI Library **Element Plus**를 선정해 3일차(Axios 연동) 화면에 적용한 실습입니다.
+
+## 1. 선정 라이브러리
+- [Element Plus](https://element-plus.org/)
+- 설치: `npm install element-plus @element-plus/icons-vue`
+- `main.js`에서 전역 등록 (`app.use(ElementPlus)`)
+
+## 2. 적용 컴포넌트
+- `App.vue`: `el-menu` 내비게이션
+- `UnitToggler.vue`: `el-tag`, `el-button`
+- `SearchBar.vue`: `el-input`, `el-icon`
+- `WeatherCard.vue`: `el-card`, `el-tag`, `el-button`
+- `BaseDashboardCard.vue`: `el-card`, `el-row`
+- `WeatherHomeView.vue`: `el-alert`, `el-radio-group`, `el-skeleton`, `el-empty`
+- `WeatherDetailView.vue`: `el-descriptions`, `el-table`, `el-divider`, `el-image`
+- `WeatherStatsView` / `About` / `NotFound`: `el-card`, `el-result` 등
+
+## 3. 참고
+- OpenWeatherMap / 외부 API 연동 로직은 Axios 실습과 동일하게 유지
+- UI만 Element Plus로 교체하여 사용성·시각적 완성도 향상
+
+---
+
+# Source Code 품질관리
+
+## 1. ESLint 점검
+- 실행 명령:
+
+```sh
+cd weather
+npm run lint
+```
+
+- Oxlint + ESLint로 점검하며, **제출 과제 Error 0건**을 목표로 한다.
+- 현재 프로젝트 기준 lint 통과 (Error 없음)
+
+## 2. API Key 환경 변수 관리
+- OpenWeatherMap API Key는 `.env`에 저장
+
+```env
+VITE_OPENWEATHER_API_KEY=발급받은_키
+```
+
+- `.env`는 `.gitignore`에 포함되어 **Git에 업로드되지 않음**
+- 저장소에는 `.env.example`만 제공
+- Vercel 배포 시에도 Environment Variable로 동일 키를 등록한다
+
+---
+
+# Build & Deployment
+
+## 1. Project Build
+
+```sh
+cd weather
+npm run build
+```
+
+- 빌드 결과물: `weather/dist/` (정적 파일)
+- 로컬 확인: `npm run preview`
+
+## 2. Hosting (Vercel)
+- 대상: Vue 앱 폴더 `weather/`
+- SPA 라우팅을 위해 `weather/vercel.json` rewrite 설정
+- Vercel Project Settings
+  - **Root Directory**: `weather`
+  - **Build Command**: `npm run build`
+  - **Output Directory**: `dist`
+  - **Environment Variable**: `VITE_OPENWEATHER_API_KEY`
+- 배포 후 발급된 URL로 대시보드/상세/통계 동작 확인

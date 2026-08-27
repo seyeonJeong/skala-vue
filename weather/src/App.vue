@@ -1,18 +1,42 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import UnitToggler from './components/exercise/UnitToggler.vue'
+
+const route = useRoute()
+const router = useRouter()
+
+const menus = [
+  { path: '/', label: '대시보드' },
+  { path: '/stats', label: '통계' },
+  { path: '/about', label: '소개' },
+]
+
+const onSelect = (path) => {
+  if (route.path !== path) router.push(path)
+}
 </script>
 
 <template>
   <div class="app-shell">
-    <nav class="nav-bar">
-      <RouterLink to="/">대시보드</RouterLink>
-      <RouterLink to="/stats">통계</RouterLink>
-      <RouterLink to="/about">소개</RouterLink>
+    <el-menu
+      mode="horizontal"
+      :ellipsis="false"
+      :default-active="route.path"
+      class="nav-menu"
+      @select="onSelect"
+    >
+      <el-menu-item
+        v-for="menu in menus"
+        :key="menu.path"
+        :index="menu.path"
+      >
+        {{ menu.label }}
+      </el-menu-item>
 
-      <!-- 내비 옆에 단위 토글러 배치 -->
-      <UnitToggler />
-    </nav>
+      <div class="nav-right">
+        <UnitToggler />
+      </div>
+    </el-menu>
 
     <RouterView />
   </div>
@@ -23,22 +47,15 @@ import UnitToggler from './components/exercise/UnitToggler.vue'
   width: 100%;
 }
 
-.nav-bar {
+.nav-menu {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--el-border-color);
+}
+
+.nav-right {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #ddd;
-}
-
-.nav-bar a {
-  color: #2c3e50;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.nav-bar a.router-link-active {
-  color: #2c6ecb;
+  padding-right: 12px;
 }
 </style>

@@ -6,23 +6,33 @@ const router = useRouter()
 
 <template>
   <main class="container">
-    <h1>Weather Dashboard 소개</h1>
+    <el-card shadow="never">
+      <template #header>
+        <h1>Weather Dashboard 소개</h1>
+      </template>
 
-    <p>
-      이 서비스는 Vue.js Composition API와 컴포넌트 구조를 활용한
-      지역별 날씨 Mock 대시보드입니다.
-    </p>
+      <p>
+        이 서비스는 Vue.js Composition API, Router, Pinia, Axios와
+        Element Plus UI Library를 활용한 지역별 날씨 대시보드입니다.
+      </p>
 
-    <ul>
-      <li>도시 검색 및 카드 선택</li>
-      <li>최고 기온 / 최고 습도 하이라이트</li>
-      <li>도시별 상세 기상관측 페이지</li>
-      <li>Vue Router 기반 페이지 이동</li>
-    </ul>
+      <el-divider />
 
-    <button @click="router.push('/')">
-      메인 대시보드로 돌아가기
-    </button>
+      <ul>
+        <li>도시 검색 및 카드 선택</li>
+        <li>최고 기온 / 최고 습도 하이라이트</li>
+        <li>OpenWeatherMap 실데이터 + 예보/대기질</li>
+        <li>외부 API(Open-Meteo, Wikipedia) 도시 정보</li>
+        <li>Element Plus UI 컴포넌트 적용</li>
+      </ul>
+
+      <el-button
+        type="primary"
+        @click="router.push('/')"
+      >
+        메인 대시보드로 돌아가기
+      </el-button>
+    </el-card>
   </main>
 </template>
 
@@ -34,13 +44,11 @@ const router = useRouter()
 
 p,
 ul {
-  margin-top: 16px;
+  margin-top: 12px;
   line-height: 1.7;
 }
 
-button {
-  margin-top: 24px;
-  padding: 10px 16px;
-  cursor: pointer;
+.el-button {
+  margin-top: 20px;
 }
 </style>
